@@ -45,20 +45,20 @@ public class Hand : MonoBehaviour
 
     private void OnEnable()
     {
-        interactor.selectEntered.AddListener(OnGrab);
-        interactor.selectExited.AddListener(OnRelease);
+        interactor.onSelectEntered.AddListener(OnGrab);
+        interactor.onSelectExited.AddListener(OnRelease);
     }
 
-    private void OnRelease(SelectExitEventArgs arg0)
-    {
-        throw new NotImplementedException();
-    }
+    //private void OnRelease(SelectExitEventArgs arg0)
+    //{
+        //throw new NotImplementedException();
+    //}
 
     [System.Obsolete]
     private void OnDisable()
     {
-        interactor.selectEntered.RemoveListener(OnGrab);
-        interactor.selectExited.RemoveListener(OnRelease);
+        interactor.onSelectEntered.RemoveListener(OnGrab);
+        interactor.onSelectExited.RemoveListener(OnRelease);
     }
 
     // Start is called before the first frame update
