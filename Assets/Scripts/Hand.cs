@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +28,10 @@ public class Hand : MonoBehaviour
     public bool isCollisionEnabled { get; private set; } = true;
 
     public XRBaseInteractor interactor = null;
+    public void OnGrab(SelectEnterEventArgs args)
+    {
+        HandControl ctl = args.interactableObject.transform.gameObject.GetComponent<HandControl>();
+    }
 
 
     private void Awake()
@@ -37,18 +42,23 @@ public class Hand : MonoBehaviour
         }
     }
 
-    [System.Obsolete]
+
     private void OnEnable()
     {
-        interactor.onSelectEntered.AddListener(OnGrab);
-        interactor.onSelectExited.AddListener(OnRelease);
+        interactor.selectEntered.AddListener(OnGrab);
+        interactor.selectExited.AddListener(OnRelease);
+    }
+
+    private void OnRelease(SelectExitEventArgs arg0)
+    {
+        throw new NotImplementedException();
     }
 
     [System.Obsolete]
     private void OnDisable()
     {
-        interactor.onSelectEntered.RemoveListener(OnGrab);
-        interactor.onSelectExited.RemoveListener(OnRelease);
+        interactor.selectEntered.RemoveListener(OnGrab);
+        interactor.selectExited.RemoveListener(OnRelease);
     }
 
     // Start is called before the first frame update
