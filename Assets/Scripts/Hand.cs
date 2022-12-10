@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.XR.Interaction.Toolkit;
+
 
 public enum HandType
 {
@@ -19,11 +21,35 @@ public class Hand : MonoBehaviour
 
     bool m_isCurrentlyTracked = false;
 
-    List<MeshRenderer> m_currentRenderers = new List<MeshRenderer>();
+    List<Renderer> m_currentRenderers = new List<Renderer>();
 
     Collider[] m_colliders = null;
+    public bool isCollisionEnabled { get; private set; } = true;
 
-    public bool isCollisionEnabled { get; private set; } = false;
+    public XRBaseInteractor interactor = null;
+
+
+    private void Awake()
+    {
+        if(interactor == null)
+        {
+            interactor = GetComponentInParent<XRBaseInteractor>();
+        }
+    }
+
+    [System.Obsolete]
+    private void OnEnable()
+    {
+        interactor.onSelectEntered.AddListener(OnGrab);
+        interactor.onSelectExited.AddListener(OnRelease);
+    }
+
+    [System.Obsolete]
+    private void OnDisable()
+    {
+        interactor.onSelectEntered.RemoveListener(OnGrab);
+        interactor.onSelectExited.RemoveListener(OnRelease);
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -52,7 +78,7 @@ public class Hand : MonoBehaviour
     
     public void Show()
     {
-        foreach(MeshRenderer renderer in m_currentRenderers)
+        foreach(Renderer renderer in m_currentRenderers)
         {
             renderer.enabled = true;
         }
@@ -63,8 +89,8 @@ public class Hand : MonoBehaviour
     public void Hide()
     {
         m_currentRenderers.Clear();
-        MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>();
-        foreach (MeshRenderer renderer in renderers)
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        foreach (Renderer renderer in renderers)
         {
             renderer.enabled = false;
             m_currentRenderers.Add(renderer);
@@ -81,6 +107,30 @@ public class Hand : MonoBehaviour
         foreach(Collider collider in m_colliders)
         {
             collider.enabled = isCollisionEnabled;
+        }
+    }
+
+    void OnGrab(XRBaseInteractable grabbedObject)
+    {
+        HandControl ctrl = grabbedObject.GetComponent<HandControl>();
+        if(ctrl != null)
+        {
+            if(ctrl.hideHand)
+            {
+                Hide();
+            }
+        }
+    }
+
+    void OnRelease(XRBaseInteractable releasedObject)
+    {
+        HandControl ctrl = releasedObject.GetComponent<HandControl>();
+        if (ctrl != null)
+        {
+            if (ctrl.hideHand)
+            {
+                Show();
+            }
         }
     }
 }
