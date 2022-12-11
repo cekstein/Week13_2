@@ -28,10 +28,10 @@ public class Hand : MonoBehaviour
     public bool isCollisionEnabled { get; private set; } = true;
 
     public XRBaseInteractor interactor = null;
-    public void OnGrab(SelectEnterEventArgs args)
-    {
-        HandControl ctl = args.interactableObject.transform.gameObject.GetComponent<HandControl>();
-    }
+    //public void OnGrab(SelectEnterEventArgs args)
+    //{
+       // HandControl ctl = args.interactableObject.transform.gameObject.GetComponent<HandControl>();
+   // }
 
 
     private void Awake()
@@ -39,27 +39,37 @@ public class Hand : MonoBehaviour
         if(interactor == null)
         {
             interactor = GetComponentInParent<XRBaseInteractor>();
+            Debug.Log("Awake");
         }
     }
 
-
+    [Obsolete]
     private void OnEnable()
     {
-        interactor.onSelectEntered.AddListener(OnGrab);
-        interactor.onSelectExited.AddListener(OnRelease);
+        interactor.selectEntered.AddListener(OnGrab);
+        //interactor.selectExited.AddListener(OnRelease);
+        Debug.Log("Enabled");
     }
+
+ 
 
     //private void OnRelease(SelectExitEventArgs arg0)
     //{
-        //throw new NotImplementedException();
+    //throw new NotImplementedException();
     //}
 
     [System.Obsolete]
     private void OnDisable()
     {
-        interactor.onSelectEntered.RemoveListener(OnGrab);
-        interactor.onSelectExited.RemoveListener(OnRelease);
+        interactor?.selectEntered.RemoveListener(OnGrab);
+        //interactor?.selectExited.RemoveListener(OnRelease);
+        Debug.Log("Disabled");
     }
+
+    //private void OnGrab(XRBaseInteractable arg0)
+    //{
+       // throw new NotImplementedException();
+    //}
 
     // Start is called before the first frame update
     void Start()
@@ -67,6 +77,7 @@ public class Hand : MonoBehaviour
         m_colliders = GetComponentsInChildren<Collider>().Where(childCollider => !childCollider.isTrigger).ToArray();
         trackedAction.Enable();
         Hide();
+        Debug.Log("Start");
     }
 
     // Update is called once per frame
@@ -77,20 +88,22 @@ public class Hand : MonoBehaviour
         {
             m_isCurrentlyTracked = true;
             Show();
+            Debug.Log("Currently Tracked");
         }
         else if (isTracked == 0 && m_isCurrentlyTracked)
         {
             m_isCurrentlyTracked = false;
             Hide();
+            Debug.Log("Not Currently Tracked");
         }
-
     }
-    
+
     public void Show()
     {
         foreach(Renderer renderer in m_currentRenderers)
         {
             renderer.enabled = true;
+            Debug.Log("Show Hands");
         }
         isHidden = false;
         EnableCollisions(true);
@@ -104,6 +117,7 @@ public class Hand : MonoBehaviour
         {
             renderer.enabled = false;
             m_currentRenderers.Add(renderer);
+            Debug.Log("Hide Hands");
         }
         isHidden = true;
         EnableCollisions(false);
@@ -119,15 +133,15 @@ public class Hand : MonoBehaviour
             collider.enabled = isCollisionEnabled;
         }
     }
-
-    void OnGrab(XRBaseInteractable grabbedObject)
+    public void OnGrab(SelectEnterEventArgs args)
     {
-        HandControl ctrl = grabbedObject.GetComponent<HandControl>();
-        if(ctrl != null)
+        HandControl ctrl = args.interactableObject.transform.gameObject.GetComponent<HandControl>();
+        if (ctrl != null)
         {
-            if(ctrl.hideHand)
+            if (ctrl.hideHand)
             {
                 Hide();
+                Debug.Log("Hide");
             }
         }
     }
@@ -135,12 +149,13 @@ public class Hand : MonoBehaviour
     void OnRelease(XRBaseInteractable releasedObject)
     {
         HandControl ctrl = releasedObject.GetComponent<HandControl>();
-        if (ctrl != null)
+       if (ctrl != null)
         {
-            if (ctrl.hideHand)
-            {
-                Show();
-            }
+           if (ctrl.hideHand)
+        {
+        Show();
+         Debug.Log("Release and Show");
+        }
         }
     }
 }
