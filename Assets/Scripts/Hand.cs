@@ -19,6 +19,12 @@ public class Hand : MonoBehaviour
 
     public InputAction trackedAction = null;
 
+    public InputAction gripAction = null;
+
+    public Animator handAnimator = null;
+    int m_gripAmountParmeter = 0;
+
+
     bool m_isCurrentlyTracked = false;
 
     List<Renderer> m_currentRenderers = new List<Renderer>();
@@ -38,47 +44,40 @@ public class Hand : MonoBehaviour
         if(interactor == null)
         {
             interactor = GetComponentInParent<XRBaseInteractor>();
-            Debug.Log("Awake");
         }
     }
-
-    [Obsolete]
+    [System.Obsolete]
     private void OnEnable()
     {
         interactor.selectEntered.AddListener(OnGrab);
-        //interactor.selectExited.AddListener(OnRelease);
-        Debug.Log("Enabled");
+        interactor.onSelectExited.AddListener(OnRelease);
     }
 
- 
-
-    //private void OnRelease(SelectExitEventArgs arg0)
-    //{
-    //throw new NotImplementedException();
-    //}
 
     [System.Obsolete]
     private void OnDisable()
     {
         interactor?.selectEntered.RemoveListener(OnGrab);
-        //interactor?.selectExited.RemoveListener(OnRelease);
-        Debug.Log("Disabled");
+        interactor?.onSelectExited.RemoveListener(OnRelease);
     }
-
     //private void OnGrab(XRBaseInteractable arg0)
     //{
        // throw new NotImplementedException();
     //}
-
     // Start is called before the first frame update
     void Start()
     {
         m_colliders = GetComponentsInChildren<Collider>().Where(childCollider => !childCollider.isTrigger).ToArray();
         trackedAction.Enable();
+        m_gripAmountParmeter = Animator.StringToHash("GripAmount");
+        gripAction.Enable();
         Hide();
-        Debug.Log("Start");
     }
-
+    void UpdateAnimations()
+    {
+        float gripAmount = gripAction.ReadValue<float>();
+        handAnimator.SetFloat(m_gripAmountParmeter, gripAmount);
+    }
     // Update is called once per frame
     void Update()
     {
@@ -87,27 +86,23 @@ public class Hand : MonoBehaviour
         {
             m_isCurrentlyTracked = true;
             Show();
-            Debug.Log("Currently Tracked");
         }
         else if (isTracked == 0 && m_isCurrentlyTracked)
         {
             m_isCurrentlyTracked = false;
             Hide();
-            Debug.Log("Not Currently Tracked");
         }
+        UpdateAnimations();
     }
-
     public void Show()
     {
         foreach(Renderer renderer in m_currentRenderers)
         {
             renderer.enabled = true;
-            Debug.Log("Show Hands");
         }
         isHidden = false;
         EnableCollisions(true);
     }
-
     public void Hide()
     {
         m_currentRenderers.Clear();
@@ -116,12 +111,10 @@ public class Hand : MonoBehaviour
         {
             renderer.enabled = false;
             m_currentRenderers.Add(renderer);
-            Debug.Log("Hide Hands");
         }
         isHidden = true;
         EnableCollisions(false);
     }
-
     public void EnableCollisions(bool enabled)
     {
         if (isCollisionEnabled == enabled) return;
@@ -139,12 +132,10 @@ public class Hand : MonoBehaviour
         {
             if (ctrl.hideHand)
             {
-                Hide();
-                Debug.Log("Hide");
+                Hide();  
             }
         }
     }
-
     void OnRelease(XRBaseInteractable releasedObject)
     {
         HandControl ctrl = releasedObject.GetComponent<HandControl>();
@@ -153,7 +144,6 @@ public class Hand : MonoBehaviour
            if (ctrl.hideHand)
         {
         Show();
-         Debug.Log("Release and Show");
         }
         }
     }
