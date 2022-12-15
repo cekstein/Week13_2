@@ -8,7 +8,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 [Serializable]
 public class DragEvent : UnityEvent<float> { }
 
-public class DragInteractible : XRBaseInteractable
+public class DragInteractable : XRBaseInteractable
 {
     public Transform startDragPosition = null;
     public Transform endDragPosition = null;

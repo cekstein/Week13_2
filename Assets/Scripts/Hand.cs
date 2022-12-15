@@ -20,10 +20,11 @@ public class Hand : MonoBehaviour
     public InputAction trackedAction = null;
 
     public InputAction gripAction = null;
+    public InputAction triggerAction = null;
 
     public Animator handAnimator = null;
-    int m_gripAmountParmeter = 0;
-
+    int m_gripAmountParameter = 0;
+    int m_pointAmountParameter = 0;
 
     bool m_isCurrentlyTracked = false;
 
@@ -60,23 +61,28 @@ public class Hand : MonoBehaviour
         interactor?.selectEntered.RemoveListener(OnGrab);
         interactor?.onSelectExited.RemoveListener(OnRelease);
     }
-    //private void OnGrab(XRBaseInteractable arg0)
-    //{
-       // throw new NotImplementedException();
-    //}
+
     // Start is called before the first frame update
     void Start()
     {
         m_colliders = GetComponentsInChildren<Collider>().Where(childCollider => !childCollider.isTrigger).ToArray();
         trackedAction.Enable();
-        m_gripAmountParmeter = Animator.StringToHash("GripAmount");
+        m_gripAmountParameter = Animator.StringToHash("GripAmount");
+        m_pointAmountParameter = Animator.StringToHash("PointAmount");
         gripAction.Enable();
+        triggerAction.Enable();
         Hide();
     }
+
+
     void UpdateAnimations()
     {
+        float pointAmount = triggerAction.ReadValue<float>();
+        handAnimator.SetFloat(m_pointAmountParameter, pointAmount);
+
         float gripAmount = gripAction.ReadValue<float>();
-        handAnimator.SetFloat(m_gripAmountParmeter, gripAmount);
+        handAnimator.SetFloat(m_gripAmountParameter, Mathf.Clamp01(gripAmount + pointAmount));
+
     }
     // Update is called once per frame
     void Update()
