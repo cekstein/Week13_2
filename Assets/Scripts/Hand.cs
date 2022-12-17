@@ -58,6 +58,8 @@ public class Hand : MonoBehaviour
     [System.Obsolete]
     private void OnDisable()
     {
+
+        // selectEntered and onSelectExited - formatting does not work in reverse
         interactor?.selectEntered.RemoveListener(OnGrab);
         interactor?.onSelectExited.RemoveListener(OnRelease);
     }
